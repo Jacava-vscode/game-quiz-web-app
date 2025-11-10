@@ -13,6 +13,7 @@ import adminRoutes from './routes/adminRoutes.js'
 import leaderboardRoutes from './routes/leaderboardRoutes.js'
 import { notFoundHandler, errorHandler } from './middleware/errorMiddleware.js'
 import registerQuizSocketHandlers from './sockets/quizSocket.js'
+import ensureDefaultAdmin from './utils/seed.js'
 
 dotenv.config()
 
@@ -59,6 +60,7 @@ const PORT = process.env.PORT || 4000
 
 const startServer = async () => {
   await connectDB()
+  await ensureDefaultAdmin()
   registerQuizSocketHandlers(io)
 
   server.listen(PORT, () => {
