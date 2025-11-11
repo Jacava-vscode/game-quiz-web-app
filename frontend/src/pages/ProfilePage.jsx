@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import ProfileStats from '../components/ProfileStats.jsx'
 import { updateProfile } from '../services/apiClient.js'
 import { useAuth } from '../hooks/useAuth.js'
+import React from 'react'
+// TODO: Import Material UI and Framer Motion components
 
 const ProfilePage = () => {
   const navigate = useNavigate()
@@ -46,27 +48,30 @@ const ProfilePage = () => {
   }
 
   return (
-    <section className="profile-page">
-      <ProfileStats profile={user} />
-      <form className="profile-form" onSubmit={handleSubmit}>
-        <h3>Update Profile</h3>
-        <label>
-          Username
-          <input value={form.username} onChange={handleChange('username')} />
-        </label>
-        <label>
-          Avatar URL
-          <input
-            placeholder="https://"
-            value={form.avatarUrl}
-            onChange={handleChange('avatarUrl')}
-          />
-        </label>
-        <button className="btn" disabled={saving} type="submit">
-          {saving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </form>
-    </section>
+    <div>
+      <section className="profile-page">
+        <ProfileStats profile={user} />
+        <form className="profile-form" onSubmit={handleSubmit}>
+          <h3>Update Profile</h3>
+          <label>
+            Username
+            <input value={form.username} onChange={handleChange('username')} />
+          </label>
+          <label>
+            Avatar URL
+            <input
+              placeholder="https://"
+              value={form.avatarUrl}
+              onChange={handleChange('avatarUrl')}
+            />
+          </label>
+          <button className="btn" disabled={saving} type="submit">
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
+      </section>
+      {/* Profile info, stats, quiz history, achievements, settings, and Framer Motion animations will be implemented here */}
+    </div>
   )
 }
 

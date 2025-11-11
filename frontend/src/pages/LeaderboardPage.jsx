@@ -4,6 +4,8 @@ import LeaderboardTable from '../components/LeaderboardTable.jsx'
 import { fetchLeaderboard } from '../services/apiClient.js'
 import { getSocket, initSocket } from '../services/socket.js'
 import { useAuth } from '../hooks/useAuth.js'
+import React from 'react'
+// TODO: Import Material UI and Framer Motion components
 
 const LeaderboardPage = () => {
   const navigate = useNavigate()
@@ -50,31 +52,34 @@ const LeaderboardPage = () => {
   }, [loadScores])
 
   return (
-    <section className="leaderboard-page" id="leaderboard">
-      <header>
-        <h1>Leaderboard</h1>
-        <p>See who is dominating the quiz arena.</p>
-      </header>
-      <div className="leaderboard-page__filters">
-        <select value={category} onChange={(event) => setCategory(event.target.value)}>
-          <option value="">All Categories</option>
-          <option value="General Knowledge">General Knowledge</option>
-          <option value="Science">Science</option>
-          <option value="History">History</option>
-          <option value="Gaming">Gaming</option>
-        </select>
-        <select value={timeframe} onChange={(event) => setTimeframe(event.target.value)}>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-          <option value="all">All Time</option>
-        </select>
-      </div>
-      {loading ? (
-        <div className="page-loader">Loading leaderboard...</div>
-      ) : (
-        <LeaderboardTable scores={scores} />
-      )}
-    </section>
+    <div>
+      <section className="leaderboard-page" id="leaderboard">
+        <header>
+          <h1>Leaderboard</h1>
+          <p>See who is dominating the quiz arena.</p>
+        </header>
+        <div className="leaderboard-page__filters">
+          <select value={category} onChange={(event) => setCategory(event.target.value)}>
+            <option value="">All Categories</option>
+            <option value="General Knowledge">General Knowledge</option>
+            <option value="Science">Science</option>
+            <option value="History">History</option>
+            <option value="Gaming">Gaming</option>
+          </select>
+          <select value={timeframe} onChange={(event) => setTimeframe(event.target.value)}>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="all">All Time</option>
+          </select>
+        </div>
+        {loading ? (
+          <div className="page-loader">Loading leaderboard...</div>
+        ) : (
+          <LeaderboardTable scores={scores} />
+        )}
+      </section>
+      {/* Leaderboard table, filters, player rank, graphics, and Framer Motion animations will be implemented here */}
+    </div>
   )
 }
 

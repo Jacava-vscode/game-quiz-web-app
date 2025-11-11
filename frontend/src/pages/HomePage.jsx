@@ -1,8 +1,11 @@
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import HeroSection from '../components/HeroSection.jsx'
 import CategoryGrid from '../components/CategoryGrid.jsx'
 import Testimonials from '../components/Testimonials.jsx'
 import { useQuiz } from '../hooks/useQuiz.js'
+
+// TODO: Import Material UI and Framer Motion components
 
 const categories = [
   { name: 'General Knowledge', description: 'A bit of everything to test your trivia skills.' },
@@ -31,10 +34,13 @@ const HomePage = () => {
   }
 
   return (
-    <div className="home-page">
-      <HeroSection onPlay={handlePlay} />
-      <CategoryGrid categories={categories} onSelect={handleSelectCategory} />
-      <Testimonials testimonials={testimonials} />
+    <div>
+      {/* Material UI AppBar, Hero Section, Category Buttons, Testimonials, Footer, and Framer Motion animations will be implemented here */}
+      <div className="home-page">
+        <HeroSection onPlay={handlePlay} />
+        <CategoryGrid categories={categories} onSelect={handleSelectCategory} />
+        <Testimonials testimonials={testimonials} />
+      </div>
     </div>
   )
 }

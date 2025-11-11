@@ -1,3 +1,4 @@
+import React from 'react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import QuizQuestionCard from '../components/QuizQuestionCard.jsx'
@@ -139,8 +140,8 @@ const QuizPage = () => {
   }, [])
 
   const resetGame = () => {
-  setQuestions([])
-  setAnswers([])
+    setQuestions([])
+    setAnswers([])
     setCurrentIndex(0)
     setScore(0)
     setStatus('playing')

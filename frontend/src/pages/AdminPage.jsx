@@ -8,6 +8,7 @@ import {
   adminFetchCategories,
   adminFetchQuestions
 } from '../services/apiClient.js'
+import React from 'react';
 
 const AdminPage = () => {
   const [categories, setCategories] = useState([])
@@ -74,42 +75,46 @@ const AdminPage = () => {
   }
 
   return (
-    <section className="admin-page">
-      <header>
-        <h1>Admin Panel</h1>
-        <p>Curate quizzes, categories, and track community activity.</p>
-      </header>
+    <div>
+      <section className="admin-page">
+        <header>
+          <h1>Admin Panel</h1>
+          <p>Curate quizzes, categories, and track community activity.</p>
+        </header>
 
-      <div className="admin-page__forms">
-        <AdminCategoryForm loading={savingCategory} onSubmit={handleCreateCategory} />
-        <AdminQuestionForm categories={categories} loading={savingQuestion} onSubmit={handleCreateQuestion} />
-      </div>
+        <div className="admin-page__forms">
+          <AdminCategoryForm loading={savingCategory} onSubmit={handleCreateCategory} />
+          <AdminQuestionForm categories={categories} loading={savingQuestion} onSubmit={handleCreateQuestion} />
+        </div>
 
-      <section className="admin-page__list">
-        <h3>Question Library</h3>
-        {loadingQuestions ? (
-          <div className="page-loader">Loading questions...</div>
-        ) : (
-          <ul>
-            {questions.map((question) => (
-              <li key={question._id}>
-                <div>
-                  <strong>{question.question}</strong>
-                  <span>{question.category} · {question.difficulty}</span>
-                </div>
-                <button
-                  className="btn btn--ghost"
-                  onClick={() => handleDeleteQuestion(question._id)}
-                  type="button"
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+        <section className="admin-page__list">
+          <h3>Question Library</h3>
+          {loadingQuestions ? (
+            <div className="page-loader">Loading questions...</div>
+          ) : (
+            <ul>
+              {questions.map((question) => (
+                <li key={question._id}>
+                  <div>
+                    <strong>{question.question}</strong>
+                    <span>{question.category} · {question.difficulty}</span>
+                  </div>
+                  <button
+                    className="btn btn--ghost"
+                    onClick={() => handleDeleteQuestion(question._id)}
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </section>
-    </section>
+
+      {/* Admin dashboard, question/category/user management, analytics, and Framer Motion animations will be implemented here */}
+    </div>
   )
 }
 
