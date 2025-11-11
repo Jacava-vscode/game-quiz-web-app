@@ -1,0 +1,22 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[dev]
+  command = "npm run dev"
+  port = 5173
+
+[[redirects]]
+  from = "/api/*"
+  to = "http://localhost:4000/api/:splat"
+  status = 200
+
+[context.production.environment]
+  VITE_API_URL = "https://your-backend-api-url.com/api"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://your-backend-api-url.com/api"
+
+# Optional: Set NODE_VERSION if needed
+#[build.environment]
+#  NODE_VERSION = "18.20.0"
