@@ -26,35 +26,9 @@ const LoginPage = () => {
   }
 
   return (
-    <section className="auth-page">
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h1>Login</h1>
-        <label>
-          Email
-          <input
-            required
-            type="email"
-            value={form.email}
-            onChange={handleChange('email')}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            required
-            type="password"
-            value={form.password}
-            onChange={handleChange('password')}
-          />
-        </label>
-        <button className="btn" disabled={loading} type="submit">
-          {loading ? 'Signing in...' : 'Login'}
-        </button>
-        <p>
-          Need an account? <Link to="/signup">Sign up</Link>
-        </p>
-      </form>
-    </section>
+    <div>
+      {/* New animated login form will be implemented here */}
+    </div>
   )
 }
 
