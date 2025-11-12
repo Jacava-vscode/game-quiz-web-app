@@ -30,13 +30,12 @@ router.post('/login', authLimiter, [
 ], login)
 
 router.post('/token/refresh', authLimiter, (req, res, next) => {
-  // simple body validation: expect { refreshToken }
-  if (!req.body || !req.body.refreshToken) return res.status(400).json({ message: 'refreshToken is required' })
+  // cookie-only refresh: the controller will validate cookie presence
   return refreshToken(req, res, next)
 })
 
 router.post('/token/logout', authLimiter, (req, res, next) => {
-  if (!req.body || !req.body.refreshToken) return res.status(400).json({ message: 'refreshToken is required' })
+  // cookie-only logout: the controller will validate cookie presence
   return logout(req, res, next)
 })
 

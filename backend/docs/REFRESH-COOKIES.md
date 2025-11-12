@@ -70,3 +70,19 @@ Troubleshooting
 Optional next steps
 - Remove support for passing refresh tokens in the request body to enforce cookie-only flows (we currently accept both for compatibility).
 - Store a device identifier (e.g., user agent hash) with refresh tokens to make revocation/auditing easier.
+
+Update (enforced):
+- The server now enforces cookie-only refresh/logout flows. Passing a refresh token in the request body will return a 400 with a short message directing clients to use the cookie-based endpoints.
+
+Example environment settings
+- In production you should set the following env vars on your backend host (Render, Vercel, Heroku, etc):
+  - CLIENT_ORIGIN=https://your-frontend.example.com
+  - COOKIE_DOMAIN=your-frontend.example.com  # optional; set if you need to scope cookie to a specific domain/subdomain
+  - COOKIE_SAMESITE=None                    # optional override, defaults to None in production (allowed values: Lax, Strict, None)
+
+Provider notes (quick):
+- Vercel / Netlify (frontend): set `VITE_API_URL=https://your-backend.example.com/api` and `VITE_SOCKET_URL` if needed. Redeploy after setting.
+- Render / Vercel (backend): set `CLIENT_ORIGIN` and, if needed, `COOKIE_DOMAIN` in the service environment variables. Ensure `NODE_ENV=production` so cookies are marked `secure`.
+
+When to set COOKIE_DOMAIN
+- If your frontend is served from `app.example.com` and backend from `api.example.com` and you want the cookie available to subdomains, set `COOKIE_DOMAIN=.example.com`. If you only need the cookie for the exact frontend origin, leave `COOKIE_DOMAIN` unset and the cookie will default to the host that set it.

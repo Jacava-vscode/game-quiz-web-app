@@ -39,13 +39,16 @@ export const signup = async (req, res) => {
 
   // set refresh token as HttpOnly cookie for improved security
   const isProd = process.env.NODE_ENV === 'production'
+  const cookieSameSite = process.env.COOKIE_SAMESITE || (isProd ? 'None' : 'Lax')
+  const cookieDomain = process.env.COOKIE_DOMAIN || undefined
   const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'None' : 'Lax',
+    sameSite: cookieSameSite,
     maxAge: REFRESH_EXPIRES_MS,
     path: '/api'
   }
+  if (cookieDomain) cookieOptions.domain = cookieDomain
   res.cookie('refresh_token', refreshToken, cookieOptions)
 
   res.status(201).json({
@@ -106,13 +109,16 @@ export const login = async (req, res) => {
 
   // set refresh token cookie
   const isProd = process.env.NODE_ENV === 'production'
+  const cookieSameSite = process.env.COOKIE_SAMESITE || (isProd ? 'None' : 'Lax')
+  const cookieDomain = process.env.COOKIE_DOMAIN || undefined
   const cookieOptions = {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? 'None' : 'Lax',
+    sameSite: cookieSameSite,
     maxAge: REFRESH_EXPIRES_MS,
     path: '/api'
   }
+  if (cookieDomain) cookieOptions.domain = cookieDomain
   res.cookie('refresh_token', refreshToken, cookieOptions)
 
   res.json({
@@ -128,9 +134,12 @@ export const login = async (req, res) => {
 }
 
 export const refreshToken = async (req, res) => {
-  // allow token from cookie or body for compatibility
-  const incoming = req.body?.refreshToken || req.cookies?.refresh_token
-  if (!incoming) return res.status(400).json({ message: 'refreshToken required' })
+  // Enforce cookie-only refresh tokens for improved security
+  if (req.body && req.body.refreshToken) {
+    return res.status(400).json({ message: 'Passing refresh token in body is not allowed. Use cookie-based refresh.' })
+  }
+  const incoming = req.cookies?.refresh_token
+  if (!incoming) return res.status(400).json({ message: 'refreshToken cookie required' })
   const hash = hashToken(incoming)
 
   // Find user with this refresh token
@@ -154,22 +163,28 @@ export const refreshToken = async (req, res) => {
   const accessToken = generateAccessToken(user._id)
 
   // set new refresh token cookie
-  const isProd = process.env.NODE_ENV === 'production'
-  const cookieOptions = {
+  const isProd2 = process.env.NODE_ENV === 'production'
+  const cookieSameSite2 = process.env.COOKIE_SAMESITE || (isProd2 ? 'None' : 'Lax')
+  const cookieDomain2 = process.env.COOKIE_DOMAIN || undefined
+  const cookieOptions2 = {
     httpOnly: true,
-    secure: isProd,
-    sameSite: isProd ? 'None' : 'Lax',
+    secure: isProd2,
+    sameSite: cookieSameSite2,
     maxAge: REFRESH_EXPIRES_MS,
     path: '/api'
   }
-  res.cookie('refresh_token', newRefresh, cookieOptions)
+  if (cookieDomain2) cookieOptions2.domain = cookieDomain2
+  res.cookie('refresh_token', newRefresh, cookieOptions2)
 
   res.json({ accessToken })
 }
 
 export const logout = async (req, res) => {
-  // accept from cookie or body
-  const incoming = req.body?.refreshToken || req.cookies?.refresh_token
+  // Enforce cookie-only logout
+  if (req.body && req.body.refreshToken) {
+    return res.status(400).json({ message: 'Passing refresh token in body is not allowed. Use cookie-based logout.' })
+  }
+  const incoming = req.cookies?.refresh_token
   if (!incoming) {
     // clear cookie even if not provided
     res.clearCookie('refresh_token', { path: '/api' })
