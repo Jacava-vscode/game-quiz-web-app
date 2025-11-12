@@ -4,12 +4,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'https://game-quiz-backend.onrender.com/api'
 })
 
-// Debug: print resolved Vite env and axios baseURL on app start.
-// Leave this during testing in production to verify the hosting provider provided the VITE_API_URL.
-// Remove after verification to avoid leaking internal URLs in logs.
-if (typeof window !== 'undefined') {
-  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL, 'axios baseURL:', api.defaults.baseURL)
-}
+// Note: temporary debug log removed. axios baseURL continues to use VITE_API_URL when present.
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('gq_token')
