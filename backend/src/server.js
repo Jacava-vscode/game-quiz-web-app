@@ -1,6 +1,7 @@
 import http from 'http'
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
@@ -20,6 +21,16 @@ dotenv.config()
 const app = express()
 const server = http.createServer(app)
 
+// Enforce presence of critical secrets early
+const missingEnvs = []
+if (!process.env.JWT_SECRET) missingEnvs.push('JWT_SECRET')
+if (!process.env.MONGODB_URI_PRIMARY && !process.env.MONGODB_URI) missingEnvs.push('MONGODB_URI_PRIMARY')
+if (missingEnvs.length) {
+  console.error('\n[Startup] Missing required environment variables:', missingEnvs.join(', '))
+  console.error('[Startup] Add them to your deployment provider (Render/Vercel) or set in backend/.env')
+  process.exit(1)
+}
+
 // Socket.io setup
 const io = new SocketIOServer(server, {
   cors: {
@@ -31,6 +42,7 @@ const io = new SocketIOServer(server, {
 app.set('io', io)
 
 // Middleware
+app.use(helmet())
 app.use(cors({
   origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   credentials: true
