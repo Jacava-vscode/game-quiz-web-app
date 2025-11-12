@@ -1,7 +1,7 @@
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import { body } from 'express-validator'
-import { signup, login, refreshToken, logout } from '../controllers/authController.js'
+import { signup, login, refreshToken, logout, sendVerificationEmail, verifyEmail, sendResetPassword, resetPassword } from '../controllers/authController.js'
 
 const router = express.Router()
 
@@ -39,5 +39,11 @@ router.post('/token/logout', authLimiter, (req, res, next) => {
   if (!req.body || !req.body.refreshToken) return res.status(400).json({ message: 'refreshToken is required' })
   return logout(req, res, next)
 })
+
+// Email verification & password reset
+router.post('/auth/send-verify', authLimiter, (req, res, next) => sendVerificationEmail(req, res, next))
+router.get('/auth/verify', (req, res, next) => verifyEmail(req, res, next))
+router.post('/auth/send-reset', authLimiter, (req, res, next) => sendResetPassword(req, res, next))
+router.post('/auth/reset', authLimiter, (req, res, next) => resetPassword(req, res, next))
 
 export default router

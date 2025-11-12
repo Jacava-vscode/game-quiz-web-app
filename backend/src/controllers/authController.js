@@ -3,6 +3,8 @@ import { validationResult } from 'express-validator'
 import User from '../models/User.js'
 import { generateAccessToken, generateRefreshToken, hashToken } from '../utils/token.js'
 import ms from 'ms'
+import { sendMail } from '../utils/mailer.js'
+import crypto from 'crypto'
 
 const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
 const REFRESH_EXPIRES_MS = ms(REFRESH_EXPIRES) || 7 * 24 * 60 * 60 * 1000
@@ -142,4 +144,94 @@ export const logout = async (req, res) => {
   if (tokenEntry) tokenEntry.revokedAt = new Date()
   await user.save()
   res.json({ message: 'Logged out' })
+}
+
+// --- Email verification & password reset ---
+const EMAIL_VERIFY_EXPIRES = process.env.EMAIL_VERIFY_EXPIRES || '24h'
+const PASSWORD_RESET_EXPIRES = process.env.PASSWORD_RESET_EXPIRES || '1h'
+
+const genRawToken = () => crypto.randomBytes(32).toString('hex')
+
+export const sendVerificationEmail = async (req, res) => {
+  const { email } = req.body
+  if (!email) return res.status(400).json({ message: 'email is required' })
+
+  const user = await User.findOne({ email })
+  if (!user) {
+    // don't reveal whether email exists
+    return res.status(200).json({ message: 'Verification email sent if account exists' })
+  }
+
+  const raw = genRawToken()
+  const hash = hashToken(raw)
+  const expiresAt = new Date(Date.now() + ms(EMAIL_VERIFY_EXPIRES))
+  user.emailVerifyTokenHash = hash
+  user.emailVerifyExpires = expiresAt
+  await user.save()
+
+  const verifyUrl = `${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/verify?token=${raw}`
+  await sendMail({
+    to: user.email,
+    subject: 'Verify your Game Quiz account',
+    text: `Click to verify: ${verifyUrl}`,
+    html: `<p>Click to verify: <a href="${verifyUrl}">${verifyUrl}</a></p>`
+  })
+
+  return res.status(200).json({ message: 'Verification email sent if account exists' })
+}
+
+export const verifyEmail = async (req, res) => {
+  const token = req.body?.token || req.query?.token
+  if (!token) return res.status(400).json({ message: 'token is required' })
+  const hash = hashToken(token)
+  const user = await User.findOne({ emailVerifyTokenHash: hash })
+  if (!user) return res.status(400).json({ message: 'Invalid or expired token' })
+  if (user.emailVerifyExpires && user.emailVerifyExpires < new Date()) return res.status(400).json({ message: 'Token expired' })
+  user.emailVerified = true
+  user.emailVerifyTokenHash = undefined
+  user.emailVerifyExpires = undefined
+  await user.save()
+  return res.json({ message: 'Email verified' })
+}
+
+export const sendResetPassword = async (req, res) => {
+  const { email } = req.body
+  if (!email) return res.status(400).json({ message: 'email is required' })
+  const user = await User.findOne({ email })
+  if (!user) return res.status(200).json({ message: 'If an account exists, a reset link has been sent' })
+  const raw = genRawToken()
+  const hash = hashToken(raw)
+  const expiresAt = new Date(Date.now() + ms(PASSWORD_RESET_EXPIRES))
+  user.resetPasswordTokenHash = hash
+  user.resetPasswordExpires = expiresAt
+  await user.save()
+
+  const resetUrl = `${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/reset-password?token=${raw}`
+  await sendMail({
+    to: user.email,
+    subject: 'Reset your Game Quiz password',
+    text: `Reset link: ${resetUrl}`,
+    html: `<p>Reset link: <a href="${resetUrl}">${resetUrl}</a></p>`
+  })
+
+  return res.status(200).json({ message: 'If an account exists, a reset link has been sent' })
+}
+
+export const resetPassword = async (req, res) => {
+  const { token, password } = req.body
+  if (!token || !password) return res.status(400).json({ message: 'token and password required' })
+  const hash = hashToken(token)
+  const user = await User.findOne({ resetPasswordTokenHash: hash })
+  if (!user) return res.status(400).json({ message: 'Invalid or expired token' })
+  if (user.resetPasswordExpires && user.resetPasswordExpires < new Date()) return res.status(400).json({ message: 'Token expired' })
+
+  const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10)
+  user.passwordHash = await bcrypt.hash(password, rounds)
+  user.resetPasswordTokenHash = undefined
+  user.resetPasswordExpires = undefined
+  // revoke all refresh tokens
+  user.refreshTokens = []
+  await user.save()
+
+  return res.json({ message: 'Password reset successful' })
 }
