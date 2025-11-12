@@ -27,7 +27,26 @@ const userSchema = new mongoose.Schema({
   completedQuizzes: { type: [completedQuizSchema], default: [] },
 
   // Administrative / metadata
-  lastLoginAt: { type: Date }
+  lastLoginAt: { type: Date },
+  
+  // Security & tokens
+  // Array of refresh tokens (stored as hashed values) for rotation/revocation
+  refreshTokens: [{
+    tokenHash: { type: String },
+    createdAt: { type: Date, default: Date.now },
+    expiresAt: { type: Date },
+    revokedAt: { type: Date },
+    replacedByTokenHash: { type: String }
+  }],
+  // Email verification & password reset
+  emailVerified: { type: Boolean, default: false },
+  emailVerifyTokenHash: { type: String },
+  emailVerifyExpires: { type: Date },
+  resetPasswordTokenHash: { type: String },
+  resetPasswordExpires: { type: Date },
+  // Account lockout
+  failedLoginAttempts: { type: Number, default: 0 },
+  lockUntil: { type: Date }
 }, { timestamps: true })
 
 // Indexes: ensure fast lookups and uniqueness at the DB level

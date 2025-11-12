@@ -4,6 +4,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import dotenv from 'dotenv'
+import ms from 'ms'
 import cookieParser from 'cookie-parser'
 import { Server as SocketIOServer } from 'socket.io'
 import connectDB from './config/db.js'
@@ -17,6 +18,31 @@ import registerQuizSocketHandlers from './sockets/quizSocket.js'
 import ensureDefaultAdmin from './utils/seed.js'
 
 dotenv.config()
+
+// Validate JWT and refresh token expiry configuration
+try {
+  const jwtExp = process.env.JWT_EXPIRES_IN || '15m'
+  const jwtMs = ms(jwtExp)
+  if (!jwtMs || jwtMs <= 0) {
+    console.warn(`[Startup] Invalid JWT_EXPIRES_IN value (${jwtExp}), falling back to 15m`)
+    process.env.JWT_EXPIRES_IN = '15m'
+  } else if (jwtMs > ms('30d')) {
+    console.warn(`[Startup] JWT_EXPIRES_IN is very long (${jwtExp}). For security prefer <= 30d. Capping to 30d.`)
+    process.env.JWT_EXPIRES_IN = '30d'
+  }
+
+  const refreshExp = process.env.REFRESH_TOKEN_EXPIRES_IN || '7d'
+  const refreshMs = ms(refreshExp)
+  if (!refreshMs || refreshMs <= 0) {
+    console.warn(`[Startup] Invalid REFRESH_TOKEN_EXPIRES_IN (${refreshExp}), falling back to 7d`)
+    process.env.REFRESH_TOKEN_EXPIRES_IN = '7d'
+  } else if (refreshMs > ms('365d')) {
+    console.warn(`[Startup] REFRESH_TOKEN_EXPIRES_IN is very long (${refreshExp}). Capping to 365d.`)
+    process.env.REFRESH_TOKEN_EXPIRES_IN = '365d'
+  }
+} catch (err) {
+  console.warn('[Startup] Could not parse token expiry envs:', err.message)
+}
 
 const app = express()
 const server = http.createServer(app)
