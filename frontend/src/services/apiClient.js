@@ -4,6 +4,9 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'https://game-quiz-backend.onrender.com/api'
 })
 
+// Ensure axios sends cookies (refresh token) when using cookie-based refresh
+api.defaults.withCredentials = true
+
 // Note: temporary debug log removed. axios baseURL continues to use VITE_API_URL when present.
 
 api.interceptors.request.use((config) => {

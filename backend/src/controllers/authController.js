@@ -37,9 +37,19 @@ export const signup = async (req, res) => {
   user.refreshTokens.push({ tokenHash: refreshHash, createdAt: new Date(), expiresAt })
   await user.save()
 
+  // set refresh token as HttpOnly cookie for improved security
+  const isProd = process.env.NODE_ENV === 'production'
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'None' : 'Lax',
+    maxAge: REFRESH_EXPIRES_MS,
+    path: '/api'
+  }
+  res.cookie('refresh_token', refreshToken, cookieOptions)
+
   res.status(201).json({
     accessToken,
-    refreshToken,
     user: {
       id: user._id,
       username: user.username,
@@ -94,9 +104,19 @@ export const login = async (req, res) => {
   user.refreshTokens.push({ tokenHash: refreshHash, createdAt: new Date(), expiresAt })
   await user.save()
 
+  // set refresh token cookie
+  const isProd = process.env.NODE_ENV === 'production'
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'None' : 'Lax',
+    maxAge: REFRESH_EXPIRES_MS,
+    path: '/api'
+  }
+  res.cookie('refresh_token', refreshToken, cookieOptions)
+
   res.json({
     accessToken,
-    refreshToken,
     user: {
       id: user._id,
       username: user.username,
@@ -108,7 +128,8 @@ export const login = async (req, res) => {
 }
 
 export const refreshToken = async (req, res) => {
-  const { refreshToken: incoming } = req.body
+  // allow token from cookie or body for compatibility
+  const incoming = req.body?.refreshToken || req.cookies?.refresh_token
   if (!incoming) return res.status(400).json({ message: 'refreshToken required' })
   const hash = hashToken(incoming)
 
@@ -131,12 +152,29 @@ export const refreshToken = async (req, res) => {
   await user.save()
 
   const accessToken = generateAccessToken(user._id)
-  res.json({ accessToken, refreshToken: newRefresh })
+
+  // set new refresh token cookie
+  const isProd = process.env.NODE_ENV === 'production'
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? 'None' : 'Lax',
+    maxAge: REFRESH_EXPIRES_MS,
+    path: '/api'
+  }
+  res.cookie('refresh_token', newRefresh, cookieOptions)
+
+  res.json({ accessToken })
 }
 
 export const logout = async (req, res) => {
-  const { refreshToken: incoming } = req.body
-  if (!incoming) return res.status(400).json({ message: 'refreshToken required' })
+  // accept from cookie or body
+  const incoming = req.body?.refreshToken || req.cookies?.refresh_token
+  if (!incoming) {
+    // clear cookie even if not provided
+    res.clearCookie('refresh_token', { path: '/api' })
+    return res.status(200).json({ message: 'OK' })
+  }
   const hash = hashToken(incoming)
   const user = await User.findOne({ 'refreshTokens.tokenHash': hash })
   if (!user) return res.status(200).json({ message: 'OK' })

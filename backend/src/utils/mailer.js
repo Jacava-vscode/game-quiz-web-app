@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import sgMail from '@sendgrid/mail'
 import fs from 'fs'
 import path from 'path'
 
@@ -16,6 +17,26 @@ let transport = null
 const initTransport = () => {
   if (transport) return transport
   // If SMTP env is provided, use real transport
+  // Prefer SendGrid when available
+  if (process.env.SENDGRID_API_KEY) {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    transport = {
+      sendMail: async (mailOptions) => {
+        // sendgrid expects to: to, from, subject, text, html
+        const msg = {
+          to: mailOptions.to,
+          from: mailOptions.from || process.env.EMAIL_FROM || 'no-reply@example.com',
+          subject: mailOptions.subject,
+          text: mailOptions.text,
+          html: mailOptions.html
+        }
+        const res = await sgMail.send(msg)
+        return res
+      }
+    }
+    return transport
+  }
+
   if (process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
     transport = nodemailer.createTransport({
       host: process.env.EMAIL_HOST,
