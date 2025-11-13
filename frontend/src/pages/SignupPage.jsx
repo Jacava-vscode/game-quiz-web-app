@@ -46,68 +46,7 @@ const SignupPage = () => {
               <TextField
                 label="Username"
                 fullWidth
-                required
-                margin="normal"
-                value={form.username}
+          // Signup page removed for full-access mode
+          const SignupPage = () => <div style={{padding:40}}><h2>Signup Disabled</h2><p>All features are now open access.</p></div>
+          export default SignupPage
                 onChange={handleChange('username')}
-                variant="outlined"
-                color="secondary"
-              />
-              <TextField
-                label="Email"
-                type="email"
-                fullWidth
-                required
-                margin="normal"
-                value={form.email}
-                onChange={handleChange('email')}
-                variant="outlined"
-                color="secondary"
-              />
-              <TextField
-                label="Password"
-                type="password"
-                fullWidth
-                required
-                margin="normal"
-                value={form.password}
-                onChange={handleChange('password')}
-                variant="outlined"
-                color="secondary"
-              />
-              <TextField
-                label="Confirm Password"
-                type="password"
-                fullWidth
-                required
-                margin="normal"
-                value={form.confirmPassword}
-                onChange={handleChange('confirmPassword')}
-                variant="outlined"
-                color="secondary"
-              />
-            </motion.div>
-            {error && <Typography color="error" align="center" sx={{ mt: 1 }}>{error}</Typography>}
-            <motion.div whileHover={{ scale: 1.05 }}>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                sx={{ mt: 2, py: 1.5, fontWeight: 600, fontSize: '1.1rem', background: 'linear-gradient(90deg, #FF6B6B 0%, #6D5BFF 100%)' }}
-                disabled={loading}
-              >
-                {loading ? 'Signing up...' : 'Sign Up'}
-              </Button>
-            </motion.div>
-            <Typography align="center" sx={{ mt: 2 }}>
-              Already have an account? <Link to="/login" style={{ color: '#6D5BFF', fontWeight: 600 }}>Login</Link>
-            </Typography>
-          </form>
-        </Paper>
-      </motion.div>
-    </Box>
-  )
-}
-
-export default SignupPage

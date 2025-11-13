@@ -1,4 +1,16 @@
 /* eslint-disable react-refresh/only-export-components */
+import { createContext } from 'react'
+
+export const AuthContext = createContext({})
+
+export const AuthProvider = ({ children }) => children
+
+// AuthContext removed for full-access mode
+
+// ...existing code...
+
+// ...existing code...
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { getProfile, loginUser, signupUser } from '../services/apiClient'
 

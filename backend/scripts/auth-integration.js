@@ -1,6 +1,34 @@
 #!/usr/bin/env node
 import got from 'got'
 import { CookieJar } from 'tough-cookie'
+import path from 'path'
+import { fileURLToPath, pathToFileURL } from 'url'
+
+// Optionally start an in-memory MongoDB and the backend server in this process
+// Set USE_MEMDB=1 to enable. This makes the integration test self-contained.
+let _mongod = null
+const maybeStartMemoryServer = async () => {
+  if (process.env.USE_MEMDB !== '1') return
+  const { MongoMemoryServer } = await import('mongodb-memory-server')
+  _mongod = await MongoMemoryServer.create()
+  const uri = _mongod.getUri()
+  process.env.MONGODB_URI_PRIMARY = uri
+  process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret'
+  process.env.NODE_ENV = 'development'
+  process.env.PORT = process.env.PORT || '3000'
+  console.log('[auth-integration] started in-memory mongo at', uri)
+
+  // import and start the server in this process
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+  const serverFile = path.join(__dirname, '../src/server.js')
+  await import(pathToFileURL(serverFile).href)
+
+  process.on('exit', async () => {
+    if (_mongod) await _mongod.stop()
+  })
+}
+
 
 // Simple integration test for login -> refresh -> logout flows.
 // Usage: BASE_URL=http://localhost:3000/api node scripts/auth-integration.js
@@ -64,7 +92,12 @@ const run = async () => {
   console.log('\nIntegration test complete. If any step printed FAIL above, exit code is non-zero.')
 }
 
-run().catch(err => {
-  console.error('Error during integration test:', err.message || err)
-  process.exitCode = 3
-})
+;(async () => {
+  try {
+    await maybeStartMemoryServer()
+    await run()
+  } catch (err) {
+    console.error('Error during integration test:', err.message || err)
+    process.exitCode = 3
+  }
+})()
