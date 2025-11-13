@@ -399,6 +399,53 @@
 .admin-form__option label {
   display: flex;
   align-items: center;
+
+/* Navbar dropdown styles */
+.nav-sections {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-item {
+  position: relative;
+}
+.nav-item > a,
+.nav-item > span,
+.nav-item > .nav-link {
+  color: #cbd5f5;
+  font-weight: 500;
+  padding: 0.5rem 0.6rem;
+  display: inline-block;
+}
+.nav-dropdown > .dropdown {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 6px);
+  background: rgba(2,6,23,0.9);
+  border: 1px solid rgba(148,163,184,0.12);
+  padding: 0.5rem;
+  border-radius: 0.6rem;
+  min-width: 180px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  display: none;
+  z-index: 40;
+}
+.nav-dropdown:hover > .dropdown,
+.nav-dropdown:focus-within > .dropdown {
+  display: block;
+}
+.dropdown li { margin: 0; }
+.dropdown li a { display: block; padding: 0.45rem 0.6rem; color: #e6eef8; }
+.dropdown li a:hover { background: rgba(56,189,248,0.06); color: #fff; }
+
+/* Responsive: collapse to simple links on small screens */
+@media (max-width: 720px) {
+  .nav-sections { flex-direction: column; gap: 0.25rem; }
+  .nav-dropdown > .dropdown { position: static; box-shadow: none; }
+}
   gap: 0.35rem;
 }
 
