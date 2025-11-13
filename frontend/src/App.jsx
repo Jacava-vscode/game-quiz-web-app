@@ -17,14 +17,10 @@ const App = () => (
     <Navbar />
     <main className="app-main">
       <Routes>
-        <Route element={<ProtectedRoute />}>
-          <Route path="/play" element={<QuizPage />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Route>
-        <Route element={<ProtectedRoute requireAdmin />}>
-          <Route path="/admin" element={<AdminPage />} />
-        </Route>
+        <Route path="/play" element={<QuizPage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
